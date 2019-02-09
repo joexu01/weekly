@@ -1,0 +1,7 @@
+<p>您好！{{ user.username }}</p>
+<p>为了确认您的新邮件地址，<a href="{{ url_for('auth.change_email', token=token, _external=True) }}">请点击这里</a>。</p>
+<p>或者您可以复制下面的链接到浏览器地址栏：</p>
+<p>{{ url_for('auth.change_email', token=token, _external=True) }}</p>
+<p>祝好，</p>
+<p>创联工作室</p>
+<p><small>注意，您向此地址发送的邮件并不会被回复</small></p>

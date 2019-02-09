@@ -1,0 +1,11 @@
+您好！{{ user.username }}
+
+为了确认您的新邮件地址，请复制以下地址到地址栏：
+
+{{ url_for('auth.change_email', token=token, _external=True) }}
+
+祝好,
+
+创联工作室
+
+注意，您向此地址发送的邮件并不会被回复

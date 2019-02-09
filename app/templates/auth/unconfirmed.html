@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}
+周报系统-确认账户
+{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>您好， {{ current_user.username }}！</h1>
+    <h3>您尚未确认您的账户</h3>
+    <p>在您访问此页面之前，您需要确认您的账户</p>
+    <p>
+        找不到确认邮件？请<a href="{{ url_for('auth.resend_confirmation') }}">点击这里</a>重新发送
+
+    </p>
+
+</div>
+{% endblock %}

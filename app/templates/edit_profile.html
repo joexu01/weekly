@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}周报系统-编辑资料{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>编辑资料</h1>
+    <img src="{{ user_img.url(current_user.avatar) }}" width="128" height="128">
+</div>
+
+<div class="col-md-4">
+    {{ wtf.quick_form(form) }}
+</div>
+{% endblock %}

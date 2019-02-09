@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}周报系统{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>您好, {% if current_user.is_authenticated %}{{ current_user.name }}{% else %}Stranger{% endif %}!</h1>
+</div>
+{% endblock %}
