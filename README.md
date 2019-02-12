@@ -6,7 +6,9 @@
 
 ## 目前完成的功能
 
-用户登陆，注册（邮箱验证），忘记密码，修改密码，修改个人信息，用户管理（管理员）
+用户登陆，注册（邮箱验证），忘记密码，修改密码，修改个人信息
+
+用户管理（管理员)，组管理（管理员）
 
 ## 在本地运行Demo
 
@@ -25,7 +27,7 @@ UPLOADED_AVATAR_DEST = 'D:/Web/weekly/app/static/avatar'  #上传头像的文件
 `(venv)$flask db upgrade`
 
 ### 运行
-`(venv)$flask run
+`(venv)$flask run`
 
 
 
