@@ -52,6 +52,13 @@ class Role(db.Model):
             db.session.add(role)
         db.session.commit()
 
+    @staticmethod  # 这是个危险的测试方法！
+    def give_admin(stu_id):
+        user = User.query.filter_by(stu_id=stu_id).first()
+        user.role_id = 3
+        db.session.add(user)
+        db.session.commit()
+
     def add_permission(self, perm):
         if not self.has_permission(perm):
             self.permissions += perm
@@ -84,6 +91,7 @@ class User(UserMixin, db.Model):
     confirmed = db.Column(db.Boolean, default=False)  # 是否验证邮箱
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), default=1)  # 权限ID
     password_hash = db.Column(db.String(128))
+    group_leader = db.relationship('Group', backref='leader', lazy='dynamic')
 
     @property
     def password(self):
@@ -175,6 +183,11 @@ class Group(db.Model):
     group_leader = db.Column(db.Integer, db.ForeignKey('users.id'))
     introduction = db.Column(db.Text())
     notice = db.Column(db.Text())
+    weekly = db.relationship('Weekly', backref='group', lazy='dynamic')
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
 
     def __repr__(self):
         return '<Group %r>' % self.group_name
@@ -257,3 +270,9 @@ class AnonymousUser(AnonymousUserMixin):
 
     def is_administrator(self):
         return False
+
+
+# class Association(db.Model):
+#     __tablename__ = 'association'
+#     id = db.Column(db.Integer, primary_key=True)
+#     group = db.Column(db.Integer, db.ForeignKey(''))

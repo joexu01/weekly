@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}周报系统-查看组{{ group.group_name }}{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h5>组名：{{ group.group_name }}</h5>
+    <h5>组长：{{ group.leader.name }}</h5>
+    <h5>简介：{{ group.introduction }}</h5>
+    <h5>备注：{{ group.notice }}</h5>
+    <p>
+        {% if current_user.id == group.leader.id or current_user.is_administrator() %}
+        <a class="btn btn-default" href="{{ url_for('gp.edit_group', group_id=group.id) }}">编辑组资料</a>
+        {% endif %}
+    </p>
+</div>
+
+{% endblock %}

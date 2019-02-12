@@ -36,14 +36,3 @@ class AddUserForm(FlaskForm):
     def validate_username(self, field):
         if User.query.filter_by(stu_id=field.data).first():
             raise ValidationError('该学号已经被其他人注册')
-
-
-class AddGroup(FlaskForm):
-    group_name = StringField('组名', validators=[DataRequired(), Length(1, 64)])
-    leader_stu_id = StringField('组长学号', validators=[DataRequired(), Length(1, 13),
-                                           Regexp('[0-9]', 0, '学号只能使用数字')])
-    submit = SubmitField('创建组')
-
-    def validate_group_name(self, field):
-        if Group.query.filter_by(group_name=field.data).first():
-            raise ValidationError('该组名已存在')

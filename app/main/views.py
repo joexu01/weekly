@@ -96,18 +96,3 @@ def delete_user(stu_id):
     user.delete()
     flash('用户已删除')
     return redirect(url_for('.user_admin'))
-
-
-# @main.route('/group_admin', methods=['GET', 'POST'])
-# @login_required
-# @admin_required
-# def group_admin():
-#     page = request.args.get('page', 1, type=int)
-#     pagination = Group.query.paginate(
-#         page, per_page=current_app.config['WEEKLY_GROUP_PER_PAGE'],
-#         error_out=False)
-#     users = [{'group_name': item.group_name, 'leader': item.group_leader, 'stu_id': item.stu_id, 'phone': item.phone,
-#               'avatar': item.avatar, 'birthday': item.birthday}
-#              for item in pagination.items]
-#     return render_template('user_admin.html', users=users, user_img=user_img,
-#                            pagination=pagination, endpoint='.user_admin')
