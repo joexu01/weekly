@@ -10,6 +10,8 @@
 
 用户管理（管理员)，组管理（管理员）
 
+查看组信息，添加组员（组长）
+
 ## 在本地运行Demo
 
 ### 配置config.py
@@ -28,7 +30,5 @@ UPLOADED_AVATAR_DEST = 'D:/Web/weekly/app/static/avatar'  #上传头像的文件
 
 ### 运行
 `(venv)$flask run`
-
-
 
 email:joexu01@yahoo.com   or   tyxiaoxu@163.com 

@@ -1,18 +1,48 @@
 {% extends "base.html" %}
+{% import"_macros.html" as macros %}
 
 {% block title %}周报系统-查看组{{ group.group_name }}{% endblock %}
 
 {% block page_content %}
 <div class="page-header">
-    <h5>组名：{{ group.group_name }}</h5>
-    <h5>组长：{{ group.leader.name }}</h5>
-    <h5>简介：{{ group.introduction }}</h5>
-    <h5>备注：{{ group.notice }}</h5>
+    <h3>组名：{{ group.group_name }}</h3>
+    <h3>组长：{{ group.leader.name }}</h3>
+    <h4>简介：{{ group.introduction }}</h4>
+    <h4>备注：{{ group.notice }}</h4>
     <p>
         {% if current_user.id == group.leader.id or current_user.is_administrator() %}
         <a class="btn btn-default" href="{{ url_for('gp.edit_group', group_id=group.id) }}">编辑组资料</a>
+        <a class="btn btn-default" href="{{ url_for('gp.add_members', group_id=group.id) }}">添加组员</a>
         {% endif %}
     </p>
 </div>
+    <h4>组员列表</h4>
+    <table class="table table-hover users">
+    <thead><tr><th>姓名</th><th>邮箱</th><th>手机号</th><th>学号</th><th>生日</th>{% if current_user.id == group.leader.id or current_user.is_administrator() %}<th>删除</th>{% endif %}</tr></thead>
+    {% for user in members %}
+        <tr>
+            <td>
+                <a href="{{ url_for('main.user', stu_id = user.member.stu_id) }}">
+                    <img class="img-rounded" src="{{ user_img.url(user.member.avatar) }}" width="25" height="25">
+                    {{ user.member.name }}
+                </a>
+            </td>
+            <td>{{ user.member.email }}</td>
+            <td>{{ user.member.phone }}</td>
+            <td>{{ user.member.stu_id }}</td>
+            <td>{{ moment(user.member.birthday).format('YYYY-MM-DD') }}</td>
+            <td>
+                {% if current_user.id == group.leader.id or current_user.is_administrator() %}
+                <a class="btn btn-danger" href="{{ url_for('gp.delete_member', group_id=group.id, member_id=user.member.id) }}">删除组员</a>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
 
+
+    <div class="pagination">
+        {{ macros.pagination_widget(pagination, endpoint, group_name = group.group_name) }}
+    </div>
+    
 {% endblock %}

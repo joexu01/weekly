@@ -10,12 +10,9 @@ from markdown import markdown
 
 # 权限常量
 class Permission:
-    # 组员
     COMMENT = 1
     WRITE = 2
-    # 组长
     GROUP = 4
-    # 管理员
     ADMIN = 8
 
 
@@ -37,7 +34,7 @@ class Role(db.Model):
     def insert_roles():
         roles = {
             'User': [Permission.COMMENT, Permission.WRITE],
-            'Group_leader': [Permission.COMMENT, Permission.WRITE, Permission.GROUP],
+            # 'Group_leader': [Permission.COMMENT, Permission.WRITE, Permission.GROUP],
             'Administrator': [Permission.COMMENT, Permission.WRITE, Permission.GROUP, Permission.ADMIN]
         }
         default_role = 'User'
@@ -55,7 +52,7 @@ class Role(db.Model):
     @staticmethod  # 这是个危险的测试方法！
     def give_admin(stu_id):
         user = User.query.filter_by(stu_id=stu_id).first()
-        user.role_id = 3
+        user.role_id = 2
         db.session.add(user)
         db.session.commit()
 
@@ -78,6 +75,19 @@ class Role(db.Model):
         return '<Role %r>' % self.name
 
 
+class Relation(db.Model):
+    __tablename__ = 'relations'
+    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'),
+                         primary_key=True)
+    member_id = db.Column(db.Integer, db.ForeignKey('users.id'),
+                          primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
 # 个人信息：邮箱，姓名，学号，生日，手机号，头像
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -92,6 +102,11 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), default=1)  # 权限ID
     password_hash = db.Column(db.String(128))
     group_leader = db.relationship('Group', backref='leader', lazy='dynamic')
+    my_weekly = db.relationship('Weekly', backref='author', lazy='dynamic')
+    groups = db.relationship('Relation',
+                             foreign_keys=[Relation.member_id],
+                             backref=db.backref('member', lazy='joined'),
+                             lazy='dynamic', cascade='all, delete-orphan')
 
     @property
     def password(self):
@@ -160,6 +175,7 @@ class User(UserMixin, db.Model):
         db.session.add(self)
         return True
 
+    # 删除用户的还需要把relations 表中的相关记录删除
     def delete(self):
         if self.is_administrator():
             return False
@@ -171,6 +187,11 @@ class User(UserMixin, db.Model):
 
     def is_administrator(self):
         return self.can(Permission.ADMIN)
+
+    def is_in_group(self, group):
+        if group.id is None:
+            return False
+        return self.groups.filter_by(group_id=group.id).first() is not None
 
     def __repr__(self):
         return '<User %r>' % self.name
@@ -184,13 +205,37 @@ class Group(db.Model):
     introduction = db.Column(db.Text())
     notice = db.Column(db.Text())
     weekly = db.relationship('Weekly', backref='group', lazy='dynamic')
+    members = db.relationship('Relation',
+                              foreign_keys=[Relation.group_id],
+                              backref=db.backref('group', lazy='joined'),
+                              lazy='dynamic', cascade='all, delete-orphan')
 
+    def __init__(self, **kwargs):
+        super(Group, self).__init__(**kwargs)
+        relation = Relation(group=self, member_id=self.group_leader)
+        db.session.add(relation)
+        db.session.commit()
+
+    # 删除方法还需要把relations 表中的相关记录删除
     def delete(self):
         db.session.delete(self)
         db.session.commit()
 
+    def is_a_member(self, user):
+        if user.id is None:
+            return False
+        return self.members.filter_by(member_id=user.id).first() is not None
+
     def __repr__(self):
         return '<Group %r>' % self.group_name
+
+
+class AnonymousUser(AnonymousUserMixin):
+    def can(self, permissions):
+        return False
+
+    def is_administrator(self):
+        return False
 
 
 class Weekly(db.Model):
@@ -206,7 +251,7 @@ class Weekly(db.Model):
     demands_html = db.Column(db.Text())
     plan_html = db.Column(db.Text())
     remarks_html = db.Column(db.Text())
-    attachment = db.Column(db.String(128))
+    attachments = db.relationship('Attachment', backref='weekly', lazy='dynamic')
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     belong_to = db.Column(db.Integer, db.ForeignKey('groups.id'))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
@@ -233,7 +278,7 @@ class Weekly(db.Model):
                         'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
                         'h1', 'h2', 'h3', 'p']
         target.demands_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'),
-                                                     tags=allowed_tags, strip=True))
+                                                          tags=allowed_tags, strip=True))
 
     @staticmethod
     def on_change_plan(target, value, oldvalue, initiator):
@@ -241,7 +286,7 @@ class Weekly(db.Model):
                         'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
                         'h1', 'h2', 'h3', 'p']
         target.plan_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'),
-                                                           tags=allowed_tags, strip=True))
+                                                       tags=allowed_tags, strip=True))
 
     @staticmethod
     def on_change_remarks(target, value, oldvalue, initiator):
@@ -249,7 +294,7 @@ class Weekly(db.Model):
                         'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
                         'h1', 'h2', 'h3', 'p']
         target.remarks_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'),
-                                                           tags=allowed_tags, strip=True))
+                                                          tags=allowed_tags, strip=True))
 
 
 db.event.listen(Weekly.finished_work, 'set', Weekly.on_change_finished_work)
@@ -259,20 +304,12 @@ db.event.listen(Weekly.plan, 'set', Weekly.on_change_plan)
 db.event.listen(Weekly.remarks, 'set', Weekly.on_change_remarks)
 
 
+class Attachment(db.Model):
+    weekly_id = db.Column(db.Integer, db.ForeignKey('weekly.id'),
+                          primary_key=True)
+    attachment_name = db.Column(db.String(128), unique=True)
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-
-class AnonymousUser(AnonymousUserMixin):
-    def can(self, permissions):
-        return False
-
-    def is_administrator(self):
-        return False
-
-
-# class Association(db.Model):
-#     __tablename__ = 'association'
-#     id = db.Column(db.Integer, primary_key=True)
-#     group = db.Column(db.Integer, db.ForeignKey(''))
