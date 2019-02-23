@@ -39,10 +39,38 @@
         </tr>
     {% endfor %}
     </table>
-
-
     <div class="pagination">
         {{ macros.pagination_widget(pagination, endpoint, group_name = group.group_name) }}
+    </div>
+
+    <h4>周报列表</h4>
+    <p>
+        {% if current_user.is_in_group(group) %}
+        <a class="btn btn-default" href="{{ url_for('wk.new_weekly', group_id=group.id) }}">新建周报</a>
+        {% endif %}
+    </p>
+    <table class="table table-hover users">
+    <thead><tr><th>主题</th><th>作者</th><th>最后一次编辑时间</th></tr></thead>
+    {% for weekly in weeklies %}
+        <tr>
+            <td>
+                <a href="{{ url_for('wk.view_weekly', weekly_id = weekly.weekly_id) }}">
+                    {{ weekly.subject }}
+                </a>
+            </td>
+            <td>
+                <a href="{{ url_for('main.user', stu_id = weekly.author.stu_id) }}">
+                    <img class="img-rounded" src="{{ user_img.url(weekly.author.avatar) }}" width="25" height="25">
+                    {{ weekly.author.name }}
+                </a>
+            </td>
+            <td>{{ moment(weekly.timestamp).format('YYYY-MM-DD HH:MM:SS') }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <div class="pagination">
+        {{ macros.pagination_widget(pagination_2, endpoint_2, group_name = group.group_name) }}
     </div>
     
 {% endblock %}

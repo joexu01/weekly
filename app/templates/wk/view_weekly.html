@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}周报系统-查看周报{% endblock %}
+
+{% block page_content %}
+
+    <div class="pager">
+    <h1>{{ weekly.subject }}</h1>
+    </div>
+
+    <a class="btn btn-default" href="{{ url_for('gp.view_group', group_name = weekly.group.group_name) }}">返回组</a>
+    {% if current_user.is_administrator or current_user == weekly.author %}
+    <a class="btn btn-default" href="{{ url_for('wk.edit_weekly', weekly_id = weekly.id) }}">编辑周报</a>
+    <a class="btn btn-danger" href="{{ url_for('wk.delete_weekly', weekly_id = weekly.id) }}">删除周报</a>
+    {% endif %}
+    <div>
+    <h2>本周完成工作</h2>
+    {% if weekly.finished_work_html %}
+        <p>{{ weekly.finished_work_html | safe }}</p>
+    {% else %}
+        <p>{{ weekly.finished_work }}</p>
+    {% endif %}
+    </div>
+
+    <div>
+    <h2>本周总结</h2>
+    {% if weekly.summary_html %}
+        <p>{{ weekly.summary_html | safe }}</p>
+    {% else %}
+        <p>{{ weekly.summary }}</p>
+    {% endif %}
+    </div>
+
+    <div>
+    <h2>协调及帮助请求</h2>
+    {% if weekly.demands_html %}
+        <p>{{ weekly.demands_html | safe }}</p>
+    {% else %}
+        <p>{{ weekly.demands }}</p>
+    {% endif %}
+    </div>
+
+    <div>
+    <h2>下周工作任务</h2>
+    {% if weekly.plan_html %}
+        <p>{{ weekly.plan_html | safe }}</p>
+    {% else %}
+        <p>{{ weekly.plan }}</p>
+    {% endif %}
+    </div>
+
+    <div>
+    <h2>备注</h2>
+    {% if weekly.remarks_html %}
+        <p>{{ weekly.remarks_html | safe }}</p>
+    {% else %}
+        <p>{{ weekly.remarks }}</p>
+    {% endif %}
+    </div>
+
+    <div>
+    <h2>附件</h2>
+    {% if weekly.attachment %}
+        <a class="btn btn-default" href="{{ wk_attachments.url(weekly.attachment) }}">下载附件</a>
+    {% endif %}
+    </div>
+
+    {% if weekly.commentable %}
+    <div class="col-md-4">
+        {{ wtf.quick_form(form) }}
+    </div>
+    {% endif %}
+
+    <ul class="comments">
+    {% for comment in comments %}
+    <li class="comment">
+        <div class="comment-thumbnail">
+            <a href="{{ url_for('main.user', stu_id=comment.author.stu_id) }}">
+                <img class="img-rounded profile-thumbnail" src="{{ user_img.url(comment.author.avatar) }}" width="25" height="25">
+            </a>
+        </div>
+        <div class="comment-content">
+            <div class="comment-date">{{ moment(comment.timestamp).fromNow() }}</div>
+            <div class="comment-author"><a href="{{ url_for('main.user', stu_id=comment.author.stu_id) }}">{{ comment.author.name }}</a></div>
+            <div class="comment-body">
+                {% if comment.body_html %}
+                    {{ comment.body_html | safe }}
+                {% else %}
+                    {{ comment.body }}
+                {% endif %}
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+    </ul>
+
+    {% if pagination %}
+    <div class="pagination">
+        {{ macros.pagination_widget(pagination, 'wk.view_weekly', fragment='#comments', weekly_id = weekly.id) }}
+    </div>
+    {% endif %}
+
+{% endblock %}

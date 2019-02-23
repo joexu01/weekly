@@ -15,14 +15,17 @@ class Config:
     FLASKY_MAIL_SENDER = 'Admin <tyxiaoxu@163.com>'
     FLASKY_ADMIN = os.environ.get('FLASKY_ADMIN')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:atk_2018@localhost:3306/weekly'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:atk_2018@localhost:3306/wk'
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     UPLOADED_AVATAR_DEST = 'D:/Web/weekly/app/static/avatar'
+    UPLOADED_ATTACHMENTS_DEST = 'D:/Web/weekly/app/static/attachments'
     # 关于这个的设置，参见
     # https://stackoverflow.com/questions/23650544/runtimeerror-cannot-access-configuration-outside-request
     IMG_UPLOAD_ALLOWED = IMAGES
-    WEEKLY_USER_PER_PAGE = 20
-    WEEKLY_GROUP_PER_PAGE = 20
+    WEEKLY_USER_PER_PAGE = 10
+    WEEKLY_GROUP_PER_PAGE = 10
+    WEEKLY_WEEKLY_PER_PAGE = 10
+    WEEKLY_COMMENT_PER_PAGE = 10
 
     @staticmethod
     def init_app(app):

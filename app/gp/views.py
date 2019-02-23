@@ -2,11 +2,23 @@ from flask import render_template, abort, redirect, url_for, flash,\
     request, current_app, make_response
 from . import gp
 from .. import db, user_img
-from .forms import AddGroupForm, EditGroupForm, SelectMembersForm
-from ..models import User, Role, Group, Permission, Relation
+from .forms import AddGroupForm, AdminEditGroupForm, SelectMembersForm, EditGroupForm
+from ..models import Group, Permission, Relation
 from flask_login import login_required, current_user
 from ..decorators import admin_required
 from sqlalchemy import and_
+
+
+# 所有组
+@gp.route('/all', methods=['GET', 'POST'])
+def all_groups():
+    page = request.args.get('page', 1, type=int)
+    pagination = Group.query.order_by(Group.id).paginate(
+        page, per_page=current_app.config['WEEKLY_GROUP_PER_PAGE'],
+        error_out=False)
+    groups = pagination.items
+    return render_template("gp/all_groups.html", groups=groups, pagination=pagination,
+                           endpoint='gp.all_groups')
 
 
 # 添加组
@@ -43,7 +55,7 @@ def group_admin():
 
 
 # 查看组资料
-@gp.route('/group/<group_name>', methods=['GET', 'POST'])
+@gp.route('/<group_name>', methods=['GET', 'POST'])
 @login_required
 def view_group(group_name):
     group = Group.query.filter_by(group_name=group_name).first_or_404()
@@ -53,9 +65,17 @@ def view_group(group_name):
         error_out=False)
     members = [{'member': item.member}
                for item in pagination.items]
+
+    page_2 = request.args.get('page', 1, type=int)
+    pagination_2 = group.weekly.paginate(
+        page_2, per_page=current_app.config['WEEKLY_WEEKLY_PER_PAGE'],
+        error_out=False)
+    weeklies = [{'subject': item.subject, 'author': item.author, 'weekly_id': item.id,
+                 'timestamp': item.timestamp} for item in pagination_2.items]
     return render_template("gp/view_group.html", group=group, members=members,
                            user_img=user_img, pagination=pagination,
-                           endpoint='gp.view_group')
+                           endpoint='gp.view_group', weeklies=weeklies,
+                           pagination_2=pagination_2, endpoint_2='gp.view_group')
 
 
 # 删除组
@@ -76,23 +96,38 @@ def delete_group(group_id):
 @login_required
 def edit_group(group_id):
     group = Group.query.filter_by(id=group_id).first_or_404()
-    if current_user.id != group.group_leader and not current_user.can(Permission.ADMIN):
+    if current_user.can(Permission.ADMIN):
+        form = AdminEditGroupForm(group)
+        if form.validate_on_submit():
+            group.group_name = form.group_name.data
+            group.group_leader = form.group_leader.data
+            group.introduction = form.introduction.data
+            group.notice = form.notice.data
+            db.session.add(group)
+            db.session.commit()
+            flash('组信息更新成功！')
+            return redirect(url_for('gp.view_group', group_name=group.group_name))
+        form.group_name.data = group.group_name
+        form.group_leader.data = group.group_leader
+        form.introduction.data = group.introduction
+        form.notice.data = group.notice
+        return render_template('gp/edit_group.html', form=form)
+    elif current_user.id == group.group_leader:
+        form = EditGroupForm()
+        if form.validate_on_submit():
+            group.group_name = form.group_name.data
+            group.introduction = form.introduction.data
+            group.notice = form.notice.data
+            db.session.add(group)
+            db.session.commit()
+            flash('组信息更新成功！')
+            return redirect(url_for('gp.view_group', group_name=group.group_name))
+        form.group_name.data = group.group_name
+        form.introduction.data = group.introduction
+        form.notice.data = group.notice
+        return render_template('gp/edit_group.html', form=form)
+    else:
         abort(403)
-    form = EditGroupForm(group)
-    if form.validate_on_submit():
-        group.group_name = form.group_name.data
-        group.group_leader = form.group_leader.data
-        group.introduction = form.introduction.data
-        group.notice = form.notice.data
-        db.session.add(group)
-        db.session.commit()
-        flash('组信息更新成功！')
-        return redirect(url_for('gp.view_group', group_name=group.group_name))
-    form.group_name.data = group.group_name
-    form.group_leader.data = group.group_leader
-    form.introduction.data = group.introduction
-    form.notice.data = group.notice
-    return render_template('gp/edit_group.html', form=form)
 
 
 # 添加成员
@@ -139,7 +174,6 @@ def delete_member(group_id, member_id):
 @gp.route('/my_groups', methods=['GET', 'POST'])
 @login_required
 def my_groups():
-    page = request.args.get('page', 1, type=int)
     show_leader = False
     if current_user.is_authenticated:
         show_leader = bool(request.cookies.get('show_leader', ''))

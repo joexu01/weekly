@@ -1,8 +1,8 @@
-from flask import render_template, abort, redirect, url_for, flash, request, current_app
+from flask import render_template, redirect, url_for, flash, request, current_app
 from . import main
 from .. import db, user_img
 from .forms import EditProfileForm, AddUserForm
-from ..models import User, Role, Group
+from ..models import User
 from flask_login import login_required, current_user
 from ..assist_func import random_string
 from ..decorators import admin_required

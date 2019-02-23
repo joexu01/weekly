@@ -107,6 +107,10 @@ class User(UserMixin, db.Model):
                              foreign_keys=[Relation.member_id],
                              backref=db.backref('member', lazy='joined'),
                              lazy='dynamic', cascade='all, delete-orphan')
+    comments = db.relationship('Comment', backref='author', lazy='dynamic')
+
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
 
     @property
     def password(self):
@@ -179,6 +183,9 @@ class User(UserMixin, db.Model):
     def delete(self):
         if self.is_administrator():
             return False
+        relations = Relation.query.filter_by(member_id=self.id).all()
+        for r in relations:
+            db.session.delete(r)
         db.session.delete(self)
         db.session.commit()
 
@@ -218,6 +225,9 @@ class Group(db.Model):
 
     # 删除方法还需要把relations 表中的相关记录删除
     def delete(self):
+        relations = Relation.query.filter_by(group_id=self.id).all()
+        for r in relations:
+            db.session.delete(r)
         db.session.delete(self)
         db.session.commit()
 
@@ -241,6 +251,7 @@ class AnonymousUser(AnonymousUserMixin):
 class Weekly(db.Model):
     __tablename__ = 'weekly'
     id = db.Column(db.Integer, primary_key=True)
+    subject = db.Column(db.String(128))
     finished_work = db.Column(db.Text())
     summary = db.Column(db.Text())
     demands = db.Column(db.Text())
@@ -251,10 +262,18 @@ class Weekly(db.Model):
     demands_html = db.Column(db.Text())
     plan_html = db.Column(db.Text())
     remarks_html = db.Column(db.Text())
-    attachments = db.relationship('Attachment', backref='weekly', lazy='dynamic')
+    attachment = db.Column(db.String(512))
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    belong_to = db.Column(db.Integer, db.ForeignKey('groups.id'))
+    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
+    visible = db.Column(db.Boolean, default=True)  # 默认全平台可见
+    commentable = db.Column(db.Boolean, default=True)  # 默认可以评论
+    comments = db.relationship('Comment', backref='weekly', lazy='dynamic')
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def ping(self):
+        self.timestamp = datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
 
     @staticmethod
     def on_change_finished_work(target, value, oldvalue, initiator):
@@ -262,7 +281,7 @@ class Weekly(db.Model):
                         'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
                         'h1', 'h2', 'h3', 'p']
         target.finished_work_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'),
-                                                           tags=allowed_tags, strip=True))
+                                                                tags=allowed_tags, strip=True))
 
     @staticmethod
     def on_change_summary(target, value, oldvalue, initiator):
@@ -304,10 +323,25 @@ db.event.listen(Weekly.plan, 'set', Weekly.on_change_plan)
 db.event.listen(Weekly.remarks, 'set', Weekly.on_change_remarks)
 
 
-class Attachment(db.Model):
-    weekly_id = db.Column(db.Integer, db.ForeignKey('weekly.id'),
-                          primary_key=True)
-    attachment_name = db.Column(db.String(128), unique=True)
+class Comment(db.Model):
+    __tablename__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    body_html = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    weekly_id = db.Column(db.Integer, db.ForeignKey('weekly.id'))
+
+    @staticmethod
+    def on_change_body(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'code', 'em', 'i',
+                        'strong']
+        target.body_html = bleach.linkify(bleach.clean(
+            markdown(value, output_format='html'),
+            tags=allowed_tags, strip=True))
+
+
+db.event.listen(Comment.body, 'set', Comment.on_change_body)
 
 
 @login_manager.user_loader

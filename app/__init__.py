@@ -14,7 +14,8 @@ moment = Moment()
 db = SQLAlchemy()
 pagedown = PageDown()
 user_img = UploadSet('avatar')
-# 关于这个的设置，参见
+wk_attachments = UploadSet('attachments')
+# 关于上传文件的设置，参见
 # https://stackoverflow.com/questions/23650544/runtimeerror-cannot-access-configuration-outside-request
 
 login_manager = LoginManager()
@@ -32,6 +33,7 @@ def create_app(config_name):
     db.init_app(app)
     login_manager.init_app(app)
     configure_uploads(app, user_img)
+    configure_uploads(app, wk_attachments)
     pagedown.init_app(app)
 
     from .main import main as main_blueprint
@@ -42,5 +44,8 @@ def create_app(config_name):
 
     from .gp import gp as gp_blueprint
     app.register_blueprint(gp_blueprint, url_prefix='/group')
+
+    from .wk import wk as wk_blueprint
+    app.register_blueprint(wk_blueprint, url_prefix='/weekly')
 
     return app

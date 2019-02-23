@@ -3,7 +3,7 @@ from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, SubmitField, DateField, PasswordField, ValidationError
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo
 from flask_uploads import IMAGES
-from ..models import User, Group
+from ..models import User
 
 
 class EditProfileForm(FlaskForm):
@@ -18,7 +18,7 @@ class EditProfileForm(FlaskForm):
 
 
 class AddUserForm(FlaskForm):
-    email = StringField('邮箱', validators=[DataRequired(), Length(1,64), Email()])
+    email = StringField('邮箱', validators=[DataRequired(), Length(1, 64), Email()])
     name = StringField('姓名', validators=[DataRequired(), Length(1, 64)])
     stu_id = StringField('学号', validators=[DataRequired(), Length(1, 13),
                                            Regexp('[0-9]', 0, '学号只能使用数字')])

@@ -24,13 +24,14 @@
             <ul class="nav navbar-nav">
                 <li><a href="{{ url_for('main.index') }}">主页</a></li>
                 {% if current_user.is_authenticated %}
-                <li><a href="{{ url_for('main.user', stu_id=current_user.stu_id) }}">个人资料</a></li>
-                <li><a href="{{ url_for('gp.my_groups') }}">我的组</a> </li>
+                    <li><a href="{{ url_for('main.user', stu_id=current_user.stu_id) }}">个人资料</a></li>
+                    <li><a href="{{ url_for('gp.all_groups') }}">所有组</a></li>
+                    <li><a href="{{ url_for('gp.my_groups') }}">我的组</a> </li>
                 {% if current_user.is_administrator() %}
-                <li><a href="{{ url_for('main.user_admin') }}">用户管理</a></li>
+                    <li><a href="{{ url_for('main.user_admin') }}">用户管理</a></li>
                 {% endif %}
                 {% if current_user.is_administrator() %}
-                <li><a href="{{ url_for('gp.group_admin') }}">组管理</a></li>
+                    <li><a href="{{ url_for('gp.group_admin') }}">组管理</a></li>
                 {% endif %}
                 {% endif %}
             </ul>

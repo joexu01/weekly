@@ -28,7 +28,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_groups_group_name'), 'groups', ['group_name'], unique=True)
-    op.create_table('weekly',
+    op.create_table('wk',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('finished_work', sa.Text(), nullable=True),
     sa.Column('summary', sa.Text(), nullable=True),
@@ -48,7 +48,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['belong_to'], ['groups.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_weekly_timestamp'), 'weekly', ['timestamp'], unique=False)
+    op.create_index(op.f('ix_weekly_timestamp'), 'wk', ['timestamp'], unique=False)
     op.add_column('roles', sa.Column('default', sa.Boolean(), nullable=True))
     op.add_column('roles', sa.Column('permissions', sa.Integer(), nullable=True))
     op.create_index(op.f('ix_roles_default'), 'roles', ['default'], unique=False)
@@ -60,8 +60,8 @@ def downgrade():
     op.drop_index(op.f('ix_roles_default'), table_name='roles')
     op.drop_column('roles', 'permissions')
     op.drop_column('roles', 'default')
-    op.drop_index(op.f('ix_weekly_timestamp'), table_name='weekly')
-    op.drop_table('weekly')
+    op.drop_index(op.f('ix_weekly_timestamp'), table_name='wk')
+    op.drop_table('wk')
     op.drop_index(op.f('ix_groups_group_name'), table_name='groups')
     op.drop_table('groups')
     # ### end Alembic commands ###
