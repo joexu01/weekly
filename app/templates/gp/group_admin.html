@@ -19,11 +19,11 @@
                     {{ group.group_name }}
                 </a>
             </td>
-            <td>{{ group.leader }}</td>
+            <td>{{ group.leader.name }}</td>
             <td>{{ group.introduction }}</td>
-            <td>{{ group.amount }}</td>
-            <td><a class="btn btn-default" href="{{ url_for('gp.edit_group', group_id = group.group_id) }}">编辑</a></td>
-            <td><a class="btn btn-danger" href="{{ url_for('gp.delete_group', group_id = group.group_id) }}">删除</a></td>
+            <td>{{ group.weekly.count() }}</td>
+            <td><a class="btn btn-default" href="{{ url_for('gp.edit_group', group_id = group.id) }}">编辑</a></td>
+            <td><a class="btn btn-danger" href="{{ url_for('gp.delete_group', group_id = group.id) }}">删除</a></td>
         </tr>
     {% endfor %}
     </table>

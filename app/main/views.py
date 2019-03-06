@@ -1,18 +1,32 @@
-from flask import render_template, redirect, url_for, flash, request, current_app
-from . import main
-from .. import db, user_img
-from .forms import EditProfileForm, AddUserForm
-from ..models import User
+import os
+
 from flask_login import login_required, current_user
+from flask import render_template, redirect, url_for, flash, request, current_app
+
+from . import main
+from .forms import EditProfileForm, AddUserForm
+
+from .. import db, user_img
+from ..models import User
 from ..assist_func import random_string
 from ..decorators import admin_required
 from ..email import send_email
-import os
+
+# 该文件中传入render_template 的参数、列表解释：
+# pagination--分页，供"_macros.html" 中的pagination_widget 使用
+# users 成员列表，（成员的集合，每一个成员对象的属性见weekly/models.py  class User）
+# user_img 用户头像集的实例，使用方法：user_img.url( filename ) ，返回头像的url
+# endpoint pagination_widget 的参数  详见 "app/templates/_macros.html"
+# form 表单实例
+# token 生成的身份认证令牌
 
 
 @main.route('/')
 def index():
-    return render_template('index.html')
+    if current_user.is_authenticated:
+        missions = current_user.missions.filter_by(is_accomplished=0).all()
+        return render_template("index.html", missions=missions)
+    return render_template("index.html")
 
 
 @main.route('/user/<stu_id>')
@@ -55,8 +69,9 @@ def user_admin():
         page, per_page=current_app.config['WEEKLY_USER_PER_PAGE'],
         error_out=False)
     users = [{'name': item.name, 'email': item.email, 'stu_id': item.stu_id, 'phone': item.phone,
-              'avatar': item.avatar, 'birthday':item.birthday}
+              'avatar': item.avatar, 'birthday': item.birthday}
              for item in pagination.items]
+    # 为了方便渲染，把users 实例中的某些属性提取出来重新建立users 集合
     return render_template('user_admin.html', users=users, user_img=user_img,
                            pagination=pagination, endpoint='.user_admin')
 
@@ -93,6 +108,7 @@ def delete_user(stu_id):
     if user == current_user:
         flash('别删除自己')
         return redirect(url_for('.user_admin'))
+    db.session.delete(user)
     user.delete()
     flash('用户已删除')
     return redirect(url_for('.user_admin'))

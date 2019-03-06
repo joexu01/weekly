@@ -27,6 +27,7 @@
                     <li><a href="{{ url_for('main.user', stu_id=current_user.stu_id) }}">个人资料</a></li>
                     <li><a href="{{ url_for('gp.all_groups') }}">所有组</a></li>
                     <li><a href="{{ url_for('gp.my_groups') }}">我的组</a> </li>
+                    <li><a href="{{ url_for('ms.my_missions') }}">我的任务</a></li>
                 {% if current_user.is_administrator() %}
                     <li><a href="{{ url_for('main.user_admin') }}">用户管理</a></li>
                 {% endif %}

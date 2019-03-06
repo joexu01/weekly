@@ -1,12 +1,24 @@
+from sqlalchemy import and_
+
 from flask import render_template, abort, redirect, url_for, flash,\
     request, current_app, make_response
-from . import gp
-from .. import db, user_img
-from .forms import AddGroupForm, AdminEditGroupForm, SelectMembersForm, EditGroupForm
-from ..models import Group, Permission, Relation
 from flask_login import login_required, current_user
+
+from . import gp
+from .forms import AddGroupForm, AdminEditGroupForm, SelectMembersForm, EditGroupForm
+
+from .. import db, user_img
+from ..models import Group, Permission, Relation
 from ..decorators import admin_required
-from sqlalchemy import and_
+
+# 该文件中传入render_template 的参数、列表解释：
+# pagination--分页，供"_macros.html" 中的pagination_widget 使用
+# groups 组列表，（组的集合，每一个组对象的属性见weekly/models.py  class Group）
+# members 成员列表，（成员的集合，每一个成员对象的属性见weekly/models.py  class User）
+# user_img 用户头像集的实例，使用方法：user_img.url( filename ) ，返回头像的url
+# endpoint pagination_widget 的参数  详见 "app/templates/_macros.html"
+# form 表单实例
+# show_leader --布尔变量 cookie 判断显示所有组还是领导的组
 
 
 # 所有组
@@ -18,7 +30,7 @@ def all_groups():
         error_out=False)
     groups = pagination.items
     return render_template("gp/all_groups.html", groups=groups, pagination=pagination,
-                           endpoint='gp.all_groups')
+                           endpoint='gp.all_groups', user_img=user_img)
 
 
 # 添加组
@@ -46,10 +58,7 @@ def group_admin():
     pagination = Group.query.paginate(
         page, per_page=current_app.config['WEEKLY_GROUP_PER_PAGE'],
         error_out=False)
-    groups = [{'group_name': item.group_name, 'leader': item.leader.name,
-               'introduction': item.introduction, 'amount': item.weekly.count(),
-               'group_id': item.id}
-              for item in pagination.items]
+    groups = pagination.items
     return render_template('gp/group_admin.html', groups=groups,
                            pagination=pagination, endpoint='gp.group_admin')
 
@@ -63,15 +72,13 @@ def view_group(group_name):
     pagination = group.members.paginate(
         page, per_page=current_app.config['WEEKLY_USER_PER_PAGE'],
         error_out=False)
-    members = [{'member': item.member}
-               for item in pagination.items]
-
+    # members = [{'member': item.member} for item in pagination.items]
+    members = pagination.items
     page_2 = request.args.get('page', 1, type=int)
     pagination_2 = group.weekly.paginate(
         page_2, per_page=current_app.config['WEEKLY_WEEKLY_PER_PAGE'],
         error_out=False)
-    weeklies = [{'subject': item.subject, 'author': item.author, 'weekly_id': item.id,
-                 'timestamp': item.timestamp} for item in pagination_2.items]
+    weeklies = pagination_2.items
     return render_template("gp/view_group.html", group=group, members=members,
                            user_img=user_img, pagination=pagination,
                            endpoint='gp.view_group', weeklies=weeklies,
@@ -88,6 +95,7 @@ def delete_group(group_id):
         flash('找不到组')
         return redirect(url_for('gp.group_admin'))
     group.delete()
+    flash('成功删除组')
     return redirect(url_for('gp.group_admin'))
 
 
@@ -166,11 +174,13 @@ def delete_member(group_id, member_id):
     if r is None:
         flash('组内没有此用户')
         return redirect(url_for('gp.view_group', group_name=group.group_name))
-    r.delete()
+    db.session.delete(r)
+    db.session.commit()
     flash('组员已删除')
     return redirect(url_for('gp.view_group', group_name=group.group_name))
 
 
+# 查看我的组
 @gp.route('/my_groups', methods=['GET', 'POST'])
 @login_required
 def my_groups():

@@ -1,23 +1,36 @@
 from flask import render_template, redirect, request, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
+
 from . import auth
+from .forms import LoginForm, RegistrationForm, ChangePasswordForm,\
+    PasswordResetRequestForm, PasswordResetForm, ChangeEmailForm
+
 from .. import db
 from ..models import User
 from ..email import send_email
-from .forms import LoginForm, RegistrationForm, ChangePasswordForm,\
-    PasswordResetRequestForm, PasswordResetForm, ChangeEmailForm
+
+# 该文件中传入render_template 的参数、列表解释：
+# form 表单实例
 
 
 @auth.before_app_request
 def before_request():
-    if current_user.is_authenticated \
-            and not current_user.confirmed \
-            and request.endpoint \
-            and request.blueprint != 'auth' \
-            and request.endpoint != 'static':
-        return redirect(url_for('auth.unconfirmed'))
+    if not current_user.is_authenticated\
+            and request.endpoint\
+            and request.blueprint != 'auth'\
+            and request.endpoint != 'static'\
+            and request.endpoint != 'main.index':
+        flash('请先登录')
+        return redirect(url_for('auth.login'))  # 若没有登录则禁止访问除auth 和 main.index 之外的视图
+    if current_user.is_authenticated:
+        if not current_user.confirmed \
+                and request.endpoint \
+                and request.blueprint != 'auth' \
+                and request.endpoint != 'static':
+            return redirect(url_for('auth.unconfirmed'))  # 若没有验证邮箱则禁止访问除auth 之外的视图
 
 
+# 未确认邮箱的视图函数
 @auth.route('/unconfirmed')
 def unconfirmed():
     if current_user.is_anonymous or current_user.confirmed:
@@ -25,6 +38,7 @@ def unconfirmed():
     return render_template('auth/unconfirmed.html')
 
 
+# 登录视图
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -40,6 +54,7 @@ def login():
     return render_template('auth/login.html', form=form)
 
 
+# 注销
 @auth.route('/logout')
 @login_required
 def logout():
@@ -48,6 +63,7 @@ def logout():
     return redirect(url_for('main.index'))
 
 
+# 注册
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
@@ -67,6 +83,7 @@ def register():
     return render_template('auth/register.html', form=form)
 
 
+# 确认邮箱
 @auth.route('/confirm/<token>')
 @login_required
 def confirm(token):
@@ -80,6 +97,7 @@ def confirm(token):
     return redirect(url_for('main.index'))
 
 
+# 重新发送确认邮件
 @auth.route('/confirm')
 @login_required
 def resend_confirmation():
@@ -90,6 +108,7 @@ def resend_confirmation():
     return redirect(url_for('main.index'))
 
 
+# 更换密码
 @auth.route('/change-password', methods=['GET', 'POST'])
 @login_required
 def change_password():
@@ -106,6 +125,7 @@ def change_password():
     return render_template("auth/change_password.html", form=form)
 
 
+# 重置密码--请求
 @auth.route('/reset', methods=['GET', 'POST'])
 def password_reset_request():
     if not current_user.is_anonymous:
@@ -123,6 +143,7 @@ def password_reset_request():
     return render_template('auth/reset_password.html', form=form)
 
 
+# 重置密码
 @auth.route('/reset/<token>', methods=['GET', 'POST'])
 def password_reset(token):
     if not current_user.is_anonymous:
@@ -138,6 +159,7 @@ def password_reset(token):
     return render_template('auth/reset_password.html', form=form)
 
 
+# 更换邮箱--请求
 @auth.route('/change_email', methods=['GET', 'POST'])
 @login_required
 def change_email_request():
@@ -155,6 +177,7 @@ def change_email_request():
     return render_template("auth/change_email.html", form=form)
 
 
+# 更换油箱
 @auth.route('change_email/<token>')
 @login_required
 def change_email(token):

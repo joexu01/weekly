@@ -7,8 +7,11 @@
 <div class="page-header">
     <h3>组名：{{ group.group_name }}</h3>
     <h3>组长：{{ group.leader.name }}</h3>
-    <h4>简介：{{ group.introduction }}</h4>
-    <h4>备注：{{ group.notice }}</h4>
+    <h3>简介：{{ group.introduction }}</h3>
+    {% if current_user.is_in_group(group) %}
+        <h3>组内公告：</h3>
+        <h4>{{ group.notice }}</h4>
+    {% endif %}
     <p>
         {% if current_user.id == group.leader.id or current_user.is_administrator() %}
         <a class="btn btn-default" href="{{ url_for('gp.edit_group', group_id=group.id) }}">编辑组资料</a>
@@ -54,7 +57,7 @@
     {% for weekly in weeklies %}
         <tr>
             <td>
-                <a href="{{ url_for('wk.view_weekly', weekly_id = weekly.weekly_id) }}">
+                <a href="{{ url_for('wk.view_weekly', weekly_id = weekly.id) }}">
                     {{ weekly.subject }}
                 </a>
             </td>

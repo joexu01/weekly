@@ -1,13 +1,26 @@
+import os
+
+from sqlalchemy import and_
+
 from flask import render_template, abort, redirect, url_for, flash, current_app, request
+from flask_login import login_required, current_user
+
 from . import wk
 from .forms import WeeklyForm, CommentForm
-from .. import db, user_img
+
+from .. import db, user_img, wk_attachments
 from ..models import Permission, Relation, Weekly, Comment
-from flask_login import login_required, current_user
-from sqlalchemy import and_
-from .. import wk_attachments
-import os
 from ..assist_func import random_string
+
+# 该文件中传入render_template 的参数、列表解释：
+# pagination--分页，供"_macros.html" 中的 pagination_widget 使用
+# comments 评论列表，（评论的集合，每一个成员对象的属性见weekly/models.py  class Comment）
+# weekly 周报实例  具体属性见weekly/models.py  class Weekly
+# user_img 用户头像集的实例，使用方法：user_img.url( filename ) ，返回头像的url，参考模板中的用法
+# wk_attachments 周报附件集的实例，使用方法同上，参考模板中用法
+# endpoint pagination_widget（分页插件） 的参数  详见 "app/templates/_macros.html"
+# form 表单实例
+# missions 任务列表，（任务的集合，每一个成员对象的属性见weekly/models.py  class Mission）
 
 
 @wk.route('/<group_id>/new_weekly', methods=['GET', 'POST'])

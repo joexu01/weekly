@@ -21,6 +21,7 @@
             </td>
             <td>
                 <a href="{{ url_for('main.user', stu_id = group.leader.stu_id) }}">
+                    <img class="img-rounded" src="{{ user_img.url(group.leader.avatar) }}" width="25" height="25">
                     {{ group.leader.name }}
                 </a>
             </td>

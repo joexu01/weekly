@@ -5,21 +5,23 @@ from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_pagedown import PageDown
-from config import config
 from flask_uploads import UploadSet, configure_uploads
+from config import config
 
+# 实例化所有组件
 bootstrap = Bootstrap()
 mail = Mail()
 moment = Moment()
 db = SQLAlchemy()
 pagedown = PageDown()
+# 上传文件集
 user_img = UploadSet('avatar')
 wk_attachments = UploadSet('attachments')
 # 关于上传文件的设置，参见
 # https://stackoverflow.com/questions/23650544/runtimeerror-cannot-access-configuration-outside-request
 
 login_manager = LoginManager()
-login_manager.login_view = 'auth.login'
+login_manager.login_view = 'auth.login'  # 给定登录视图
 
 
 def create_app(config_name):
@@ -27,6 +29,7 @@ def create_app(config_name):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
+    # 将所有组件与应用注册
     bootstrap.init_app(app)
     mail.init_app(app)
     moment.init_app(app)
@@ -47,5 +50,8 @@ def create_app(config_name):
 
     from .wk import wk as wk_blueprint
     app.register_blueprint(wk_blueprint, url_prefix='/weekly')
+
+    from .ms import ms as ms_blueprint
+    app.register_blueprint(ms_blueprint, url_prefix='/mission')
 
     return app

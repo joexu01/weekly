@@ -1,8 +1,10 @@
-from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, SubmitField, DateField, PasswordField, ValidationError
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo
+
+from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
 from flask_uploads import IMAGES
+
 from ..models import User
 
 

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}周报系统-创建任务{% endblock %}
+
+{% block page_content %}
+<div class="col-md-4">
+{#    {% if not flag %}#}
+    {{ wtf.quick_form(form) }}
+{#    {% else %}#}
+{#    <p>{{ wtf.form_field(form.user) }}</p>#}
+{#    <p>{{ wtf.form_field(form.title) }}</p>#}
+{#    <p>{{ wtf.form_field(form.detail) }}</p>#}
+{#    <p>{{ wtf.form_field(form.year) }}年{{ wtf.form_field(form.month) }}月{{ wtf.form_field(form.day) }}日{{ wtf.form_field(form.hour) }}时</p>#}
+{#    <p>{{ wtf.form_field(form.submit) }}</p>#}
+{#{% endif %}#}
+</div>
+{% endblock %}

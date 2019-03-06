@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}周报系统-查看任务详情{% endblock %}
+
+{% block page_content %}
+    <div class="page-header"><h1>任务详情</h1></div>
+    <div>
+    <h2>{{ mission.title }}</h2>
+    <h3>来自组：{{ mission.group.group_name }}    组长：{{ mission.group.leader.name }}</h3>
+    <h4>任务详情：</h4>
+    <h4>{{ mission.detail }}</h4>
+    <p>截止日期：{{ moment(mission.deadline).format('YYYY-MM-DD') }}</p>
+    </div>
+    {% if current_user.id == mission.user_id and not mission.is_accomplished %}
+    <a class="btn btn-default" href="{{ url_for('gp.view_group', group_name = mission.group.group_name) }}">去组页面完成任务</a>
+    <p>注意：完成任务后返回此页面选择周报提交</p>
+    <div class="col-md-4">
+        {{ wtf.quick_form(form) }}
+    </div>
+    {% endif %}
+{% endblock %}

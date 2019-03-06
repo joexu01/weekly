@@ -1,10 +1,8 @@
+from wtforms import StringField, SubmitField, BooleanField
+from wtforms.validators import DataRequired
+
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, SubmitField, DateField, PasswordField, \
-    ValidationError, SelectField, TextAreaField, SelectMultipleField, BooleanField
-from wtforms.validators import DataRequired, Length
-from ..models import User, Group, Relation
-from .. import db
+from flask_wtf.file import FileField
 from flask_pagedown.fields import PageDownField
 
 
