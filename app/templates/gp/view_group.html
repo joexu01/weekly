@@ -20,21 +20,21 @@
     </p>
 </div>
     <h4>组员列表</h4>
-    <table class="table table-hover users">
-    <thead><tr><th>姓名</th><th>邮箱</th><th>手机号</th><th>学号</th><th>生日</th>{% if current_user.id == group.leader.id or current_user.is_administrator() %}<th>删除</th>{% endif %}</tr></thead>
+    <table class="table table-hover table-bordered table-striped table-responsive" style="text-align: center; vertical-align: center">
+    <thead><tr><th style="text-align: center">姓名</th><th style="text-align: center">邮箱</th><th style="text-align: center">手机号</th><th style="text-align: center">学号</th><th style="text-align: center">生日</th>{% if current_user.id == group.leader.id or current_user.is_administrator() %}<th style="text-align: center">删除</th>{% endif %}</tr></thead>
     {% for user in members %}
         <tr>
-            <td>
+            <td style="text-align: center; vertical-align: middle">
                 <a href="{{ url_for('main.user', stu_id = user.member.stu_id) }}">
                     <img class="img-rounded" src="{{ user_img.url(user.member.avatar) }}" width="25" height="25">
                     {{ user.member.name }}
                 </a>
             </td>
-            <td>{{ user.member.email }}</td>
-            <td>{{ user.member.phone }}</td>
-            <td>{{ user.member.stu_id }}</td>
-            <td>{{ moment(user.member.birthday).format('YYYY-MM-DD') }}</td>
-            <td>
+            <td style="text-align: center; vertical-align: middle">{{ user.member.email }}</td>
+            <td style="text-align: center; vertical-align: middle">{{ user.member.phone }}</td>
+            <td style="text-align: center; vertical-align: middle">{{ user.member.stu_id }}</td>
+            <td style="text-align: center; vertical-align: middle">{{ moment(user.member.birthday).format('YYYY-MM-DD') }}</td>
+            <td style="text-align: center; vertical-align: middle">
                 {% if current_user.id == group.leader.id or current_user.is_administrator() %}
                 <a class="btn btn-danger" href="{{ url_for('gp.delete_member', group_id=group.id, member_id=user.member.id) }}">删除组员</a>
                 {% endif %}
@@ -52,22 +52,22 @@
         <a class="btn btn-default" href="{{ url_for('wk.new_weekly', group_id=group.id) }}">新建周报</a>
         {% endif %}
     </p>
-    <table class="table table-hover users">
-    <thead><tr><th>主题</th><th>作者</th><th>最后一次编辑时间</th></tr></thead>
+    <table class="table table-hover table-bordered table-striped table-responsive" style="text-align: center; vertical-align: center">
+    <thead><tr><th style="text-align: center">主题</th><th style="text-align: center">作者</th><th style="text-align: center">最后一次编辑时间</th></tr></thead>
     {% for weekly in weeklies %}
         <tr>
-            <td>
+            <td style="text-align: center; vertical-align: middle">
                 <a href="{{ url_for('wk.view_weekly', weekly_id = weekly.id) }}">
                     {{ weekly.subject }}
                 </a>
             </td>
-            <td>
+            <td style="text-align: center; vertical-align: middle">
                 <a href="{{ url_for('main.user', stu_id = weekly.author.stu_id) }}">
                     <img class="img-rounded" src="{{ user_img.url(weekly.author.avatar) }}" width="25" height="25">
                     {{ weekly.author.name }}
                 </a>
             </td>
-            <td>{{ moment(weekly.timestamp).format('YYYY-MM-DD HH:MM:SS') }}</td>
+            <td style="text-align: center; vertical-align: middle">{{ moment(weekly.timestamp).format('YYYY-MM-DD HH:MM:SS') }}</td>
         </tr>
     {% endfor %}
     </table>

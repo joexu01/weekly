@@ -2,31 +2,54 @@
 {% import"_macros.html" as macros %}
 
 {% block title %}
-周报系统--用户管理
+    周报系统--用户管理
 {% endblock %}
 
 {% block page_content %}
+    <style>
+        .button_right {
+            margin-right: 20px;
+            float: right
+        }
+
+        .button_top {
+            margin-top: -45px;
+            float: top
+        }
+    </style>
     <div class="page-header">
         <h1>用户管理</h1>
+        <a class="btn btn-default button_right button_top" href="{{ url_for('.add_user') }}">添加用户</a>
     </div>
-    <a class="btn btn-default" href="{{ url_for('.add_user') }}">添加用户</a>
-    <table class="table table-hover users">
-    <thead><tr><th>姓名</th><th>邮箱</th><th>手机号</th><th>学号</th><th>生日</th><th>删除</th></tr></thead>
-    {% for user in users %}
+
+    <table class="table table-hover table-bordered table-striped" style="text-align: center; vertical-align: middle">
+        <thead>
         <tr>
-            <td>
-                <a href="{{ url_for('.user', stu_id = user.stu_id) }}">
-                    <img class="img-rounded" src="{{ user_img.url(user.avatar) }}" width="25" height="25">
-                    {{ user.name }}
-                </a>
-            </td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.phone }}</td>
-            <td>{{ user.stu_id }}</td>
-            <td>{{ moment(user.birthday).format('YYYY-MM-DD') }}</td>
-            <td><a class="btn btn-danger" href="{{ url_for('.delete_user', stu_id = user.stu_id) }}">删除用户</a></td>
+            <th style="text-align: center">姓名</th>
+            <th style="text-align: center">邮箱</th>
+            <th style="text-align: center">手机号</th>
+            <th style="text-align: center">学号</th>
+            <th style="text-align: center">生日</th>
+            <th style="text-align: center">删除</th>
         </tr>
-    {% endfor %}
+        </thead>
+        {% for user in users %}
+            <tr>
+                <td style="text-align: center; vertical-align: middle">
+                    <a href="{{ url_for('.user', stu_id = user.stu_id) }}">
+                        <img class="img-rounded" src="{{ user_img.url(user.avatar) }}" width="25" height="25">
+                        {{ user.name }}
+                    </a>
+                </td>
+                <td style="text-align: center; vertical-align: middle">{{ user.email }}</td>
+                <td style="text-align: center; vertical-align: middle">{{ user.phone }}</td>
+                <td style="text-align: center; vertical-align: middle">{{ user.stu_id }}</td>
+                <td style="text-align: center; vertical-align: middle">{{ moment(user.birthday).format('YYYY-MM-DD') }}</td>
+                <td style="text-align: center; vertical-align: middle"><a class="btn btn-danger"
+                                                                          href="{{ url_for('.delete_user', stu_id = user.stu_id) }}">删除用户</a>
+                </td>
+            </tr>
+        {% endfor %}
     </table>
 
     <div class="pagination">

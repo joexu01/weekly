@@ -3,17 +3,36 @@
 {% block title %}周报系统-{{ user.name }}{% endblock %}
 
 {% block page_content %}
-<div class="page-header">
-    <img src="{{ user_img.url(user.avatar) }}" width="128" height="128">
-    <h5>姓名：{{ user.name }}</h5>
-    <h5>生日：{{ moment(user.birthday).format('YYYY-MM-DD') }}</h5>
-    <h5>学号：{{ user.stu_id }}</h5>
-    <h5>电话：{{ user.phone }}</h5>
-    <p>
-        {% if user == current_user %}
-        <a class="btn btn-default" href="{{ url_for('.edit_profile') }}">编辑个人资料</a>
-        {% endif %}
-    </p>
+{#    <div class="page-header">#}
+    {#        <img class="img-rounded profile-thumbnail" src="{{ user_img.url(user.avatar) }}"  width="128" height="128">#}
+    {#    <img src="" width="128" height="128">#}
+    {#        <div class="profile-header">#}
+    {#            <h1>姓名：{{ user.name }}</h1>#}
+    {#            <h3>生日：{{ moment(user.birthday).format('YYYY-MM-DD') }}</h3>#}
+    {#            <h3>学号：{{ user.stu_id }}</h3>#}
+    {#            <h3>电话：{{ user.phone }}</h3>#}
+    {#            <p>#}
+    {#                {% if user == current_user %}#}
+    {#                    <a class="btn btn-default" href="{{ url_for('.edit_profile') }}">编辑个人资料</a>#}
+    {#                {% endif %}#}
+    {#            </p>#}
+    {#        </div>#}
+    {##}
+    {#    </div>#}
+
+    <div class="page-header">
+    <img class="img-rounded profile-thumbnail" src="{{ user_img.url(user.avatar) }}" height="256" width="256">
+    <div class="profile-header">
+            <h1>{{ user.name }}</h1>
+            <h3>生日：{{ moment(user.birthday).format('YYYY-MM-DD') }}</h3>
+            <h3>学号：{{ user.stu_id }}</h3>
+            <h3>电话：{{ user.phone }}</h3>
+            <p>
+                {% if user == current_user %}
+                    <a class="btn btn-default" href="{{ url_for('.edit_profile') }}">编辑个人资料</a>
+                {% endif %}
+            </p>
+        </div>
 </div>
 
 {% endblock %}

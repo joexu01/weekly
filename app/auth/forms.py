@@ -46,7 +46,7 @@ class ChangePasswordForm(FlaskForm):
     submit = SubmitField('确认更换密码')
 
 
-# 密码重置--提交邮箱
+# 密码重置--请求
 class PasswordResetRequestForm(FlaskForm):
     email = StringField('邮箱', validators=[DataRequired(), Length(1, 64),
                                           Email()])

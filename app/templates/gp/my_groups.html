@@ -2,7 +2,7 @@
 {% import"_macros.html" as macros %}
 
 {% block title %}
-周报系统--我加入的组
+    周报系统--我加入的组
 {% endblock %}
 
 {% block page_content %}
@@ -11,31 +11,43 @@
     </div>
 
     <div class="post-tabs">
-    <ul class="nav nav-tabs">
-        {% if current_user.is_authenticated %}
-        <li{% if not show_leader %} class="active"{% endif %}><a href="{{ url_for('gp.show_all') }}">我加入的组</a></li>
-        <li{% if show_leader %} class="active"{% endif %}><a href="{{ url_for('gp.show_leader') }}">我领导的组</a></li>
-        {% endif %}
-    </ul>
-
-    <table class="table table-hover users">
-    <thead><tr><th>组名</th><th>组长</th><th>简介</th><th>周报数量</th>{% if show_leader %}<th>管理组</th>{% endif %}</tr></thead>
-    {% for group in groups %}
-        <tr>
-            <td>
-                <a href="{{ url_for('gp.view_group', group_name=group.group_name) }}">
-                    {{ group.group_name }}
-                </a>
-            </td>
-            <td>{{ group.leader }}</td>
-            <td>{{ group.introduction }}</td>
-            <td>{{ group.amount }}</td>
-            {% if show_leader %}
-            <td><a class="btn btn-default" href="{{ url_for('gp.edit_group', group_id = group.group_id) }}">编辑</a></td>
+        <ul class="nav nav-tabs">
+            {% if current_user.is_authenticated %}
+                <li{% if not show_leader %} class="active"{% endif %}><a href="{{ url_for('gp.show_all') }}">我加入的组</a>
+                </li>
+                <li{% if show_leader %} class="active"{% endif %}><a href="{{ url_for('gp.show_leader') }}">我领导的组</a>
+                </li>
             {% endif %}
-        </tr>
-    {% endfor %}
-    </table>
+        </ul>
+
+        <table class="table table-hover table-bordered table-striped"
+               style="text-align: center; vertical-align: middle">
+            <thead>
+            <tr>
+                <th style="text-align: center">组名</th>
+                <th style="text-align: center">组长</th>
+                <th style="text-align: center">简介</th>
+                <th style="text-align: center">周报数量</th>{% if show_leader %}
+                <th style="text-align: center">管理组</th>{% endif %}</tr>
+            </thead>
+            {% for group in groups %}
+                <tr>
+                    <td style="text-align: center; vertical-align: middle">
+                        <a href="{{ url_for('gp.view_group', group_name=group.group_name) }}">
+                            {{ group.group_name }}
+                        </a>
+                    </td>
+                    <td style="text-align: center; vertical-align: middle">{{ group.leader }}</td>
+                    <td style="text-align: center; vertical-align: middle">{{ group.introduction }}</td>
+                    <td style="text-align: center; vertical-align: middle">{{ group.amount }}</td>
+                    {% if show_leader %}
+                        <td style="text-align: center; vertical-align: middle"><a class="btn btn-default"
+                                                                                  href="{{ url_for('gp.edit_group', group_id = group.group_id) }}">编辑</a>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
     </div>
 
     <div class="pagination">

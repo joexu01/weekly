@@ -3,26 +3,38 @@
 {% block title %}周报系统{% endblock %}
 
 {% block page_content %}
-<div class="page-header">
-    <h1>您好, {% if current_user.is_authenticated %}{{ current_user.name }}{% else %}请登录{% endif %}!</h1>
-</div>
+    <div class="page-header">
+        <h1>您好, {% if current_user.is_authenticated %}{{ current_user.name }}{% else %}请登录{% endif %}!</h1>
+    </div>
     {% if current_user.is_authenticated %}
         <h3>待完成任务</h3>
-        <table class="table table-hover users">
-    <thead><tr><th></th><th>任务名称</th><th>组</th><th>详情</th><th>截止日期</th></tr></thead>
-    {% for mission in missions %}
-        <tr>
-            <td>{% if not mission.is_known %}<img src="{{ url_for('static', filename='new.png') }}" height="20" width="20" >{% endif %}</td>
-            <td>
-                <a href="{{ url_for('ms.view_mission', mission_id = mission.id) }}">
-                    {{ mission.title }}
-                </a>
-            </td>
-            <td>{{ mission.group.group_name }}</td>
-            <td><a class="btn btn-default" href="{{ url_for('ms.view_mission', mission_id = mission.id) }}">点击查看</a></td>
-            <td>{{ moment(mission.deadline).format('YYYY-MM-DD') }}</td>
-        </tr>
-    {% endfor %}
-    </table>
+        <table class="table table-hover table-bordered table-striped"
+               style="text-align: center; vertical-align: middle">
+            <thead>
+            <tr>
+                <th style="text-align: center"></th>
+                <th style="text-align: center">任务名称</th>
+                <th style="text-align: center">组</th>
+                <th style="text-align: center">详情</th>
+                <th style="text-align: center">截止日期</th>
+            </tr>
+            </thead>
+            {% for mission in missions %}
+                <tr>
+                    <td style="text-align: center; vertical-align: middle">{% if not mission.is_known %}
+                        <img src="{{ url_for('static', filename='new.png') }}" height="20" width="20">{% endif %}</td>
+                    <td style="text-align: center; vertical-align: middle">
+                        <a href="{{ url_for('ms.view_mission', mission_id = mission.id) }}">
+                            {{ mission.title }}
+                        </a>
+                    </td>
+                    <td style="text-align: center; vertical-align: middle">{{ mission.group.group_name }}</td>
+                    <td style="text-align: center; vertical-align: middle"><a class="btn btn-default"
+                                                                              href="{{ url_for('ms.view_mission', mission_id = mission.id) }}">点击查看</a>
+                    </td>
+                    <td style="text-align: center; vertical-align: middle">{{ moment(mission.deadline).format('YYYY-MM-DD') }}</td>
+                </tr>
+            {% endfor %}
+        </table>
     {% endif %}
 {% endblock %}

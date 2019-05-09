@@ -2,30 +2,57 @@
 {% import"_macros.html" as macros %}
 
 {% block title %}
-周报系统--组管理
+    周报系统--组管理
 {% endblock %}
 
 {% block page_content %}
+    <style>
+
+        .button_right {
+            margin-right: 20px;
+            float: right
+        }
+
+        .button_top {
+            margin-top: -45px;
+            float: top
+        }
+    </style>
     <div class="page-header">
         <h1>组管理</h1>
+        <a class="btn btn-default button_top button_right" href="{{ url_for('gp.add_group') }}">添加组</a>
     </div>
-    <a class="btn btn-default" href="{{ url_for('gp.add_group') }}">添加组</a>
-    <table class="table table-hover users">
-    <thead><tr><th>组名</th><th>组长</th><th>简介</th><th>周报数量</th><th>管理组</th><th>删除组</th></tr></thead>
-    {% for group in groups %}
+    {#    <a class="btn btn-default" href="{{ url_for('gp.add_group') }}">添加组</a>#}
+
+    <table class="table table-hover table-bordered table-striped" style="text-align: center; vertical-align: middle">
+        <thead>
         <tr>
-            <td>
-                <a href="{{ url_for('gp.view_group', group_name=group.group_name) }}">
-                    {{ group.group_name }}
-                </a>
-            </td>
-            <td>{{ group.leader.name }}</td>
-            <td>{{ group.introduction }}</td>
-            <td>{{ group.weekly.count() }}</td>
-            <td><a class="btn btn-default" href="{{ url_for('gp.edit_group', group_id = group.id) }}">编辑</a></td>
-            <td><a class="btn btn-danger" href="{{ url_for('gp.delete_group', group_id = group.id) }}">删除</a></td>
+            <th style="text-align: center">组名</th>
+            <th style="text-align: center">组长</th>
+            <th style="text-align: center">简介</th>
+            <th style="text-align: center">周报数量</th>
+            <th style="text-align: center">管理组</th>
+            <th style="text-align: center">删除组</th>
         </tr>
-    {% endfor %}
+        </thead>
+        {% for group in groups %}
+            <tr>
+                <td style="text-align: center; vertical-align: middle">
+                    <a href="{{ url_for('gp.view_group', group_name=group.group_name) }}">
+                        {{ group.group_name }}
+                    </a>
+                </td>
+                <td style="text-align: center; vertical-align: middle">{{ group.leader.name }}</td>
+                <td style="text-align: center; vertical-align: middle">{{ group.introduction }}</td>
+                <td style="text-align: center; vertical-align: middle">{{ group.weekly.count() }}</td>
+                <td style="text-align: center; vertical-align: middle"><a class="btn btn-default"
+                                                                          href="{{ url_for('gp.edit_group', group_id = group.id) }}">编辑</a>
+                </td>
+                <td style="text-align: center; vertical-align: middle"><a class="btn btn-danger"
+                                                                          href="{{ url_for('gp.delete_group', group_id = group.id) }}">删除</a>
+                </td>
+            </tr>
+        {% endfor %}
     </table>
     <div class="pagination">
         {{ macros.pagination_widget(pagination, endpoint) }}

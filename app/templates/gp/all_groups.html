@@ -10,23 +10,23 @@
         <h1>查看所有组</h1>
     </div>
 
-    <table class="table table-hover users">
-    <thead><tr><th>组名</th><th>组长</th><th>简介</th><th>周报数量</th></tr></thead>
+    <table class="table table-hover table-bordered table-striped" style="text-align: center; vertical-align: middle">
+    <thead><tr><th style="text-align: center">组名</th><th style="text-align: center">组长</th><th style="text-align: center">简介</th><th style="text-align: center">周报数量</th></tr></thead>
     {% for group in groups %}
         <tr>
-            <td>
+            <td style="text-align: center; vertical-align: middle">
                 <a href="{{ url_for('gp.view_group', group_name=group.group_name) }}">
                     {{ group.group_name }}
                 </a>
             </td>
-            <td>
+            <td style="text-align: center; vertical-align: middle">
                 <a href="{{ url_for('main.user', stu_id = group.leader.stu_id) }}">
                     <img class="img-rounded" src="{{ user_img.url(group.leader.avatar) }}" width="25" height="25">
                     {{ group.leader.name }}
                 </a>
             </td>
-            <td>{{ group.introduction }}</td>
-            <td>{{ group.weekly.count() }}</td>
+            <td style="text-align: center; vertical-align: middle">{{ group.introduction }}</td>
+            <td style="text-align: center; vertical-align: middle">{{ group.weekly.count() }}</td>
         </tr>
     {% endfor %}
     </table>
