@@ -1,6 +1,8 @@
 import os
 
 from sqlalchemy import and_
+import bleach
+from markdown import markdown
 
 from flask import render_template, abort, redirect, url_for, flash, current_app, request
 from flask_login import login_required, current_user
@@ -9,8 +11,9 @@ from . import wk
 from .forms import WeeklyForm, CommentForm
 
 from .. import db, user_img, wk_attachments
-from ..models import Permission, Relation, Weekly, Comment
+from ..models import Permission, Relation, Weekly, Comment, WeeklyHtml
 from ..assist_func import random_string
+
 
 # 该文件中传入render_template 的参数、列表解释：
 # pagination--分页，供"_macros.html" 中的 pagination_widget 使用
@@ -53,6 +56,15 @@ def new_weekly(group_id):
             weekly.attachment = filename
         db.session.add(weekly)
         db.session.commit()
+        weekly_html = WeeklyHtml(weekly.id)
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+                        'h1', 'h2', 'h3', 'p']
+        weekly_html.finished_work_html = bleach.linkify(
+            bleach.clean(markdown(weekly.finished_work, output_format='html'),
+                         tags=allowed_tags, strip=True))
+        db.session.add(weekly_html)
+        db.session.commit()
         return redirect(url_for('wk.view_weekly', weekly_id=weekly.id))
     return render_template("wk/edit_weekly.html", form=form)
 
@@ -77,7 +89,7 @@ def view_weekly(weekly_id):
     page = request.args.get('page', 1, type=int)
     if page == -1:
         page = (weekly.comments.count() - 1) // \
-            current_app.config['WEEKLY_COMMENT_PER_PAGE'] + 1
+               current_app.config['WEEKLY_COMMENT_PER_PAGE'] + 1
     pagination = weekly.comments.order_by(Comment.timestamp.asc()).paginate(
         page, per_page=current_app.config['WEEKLY_COMMENT_PER_PAGE'],
         error_out=False)
@@ -134,9 +146,6 @@ def delete_weekly(weekly_id):
     group_name = weekly.group.group_name
     if current_user != weekly.group.leader and not current_user.can(Permission.ADMIN):
         abort(403)
-    for c in weekly.comments:
-        db.session.delete(c)
-        db.session.commit()
     db.session.delete(weekly)
     db.session.commit()
     return redirect(url_for('gp.view_group', group_name=group_name))

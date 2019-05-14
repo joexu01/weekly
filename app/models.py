@@ -72,6 +72,7 @@ class Role(db.Model):
 
     def has_permission(self, perm):
         return self.permissions & perm == perm
+
     # has_permission 方法用位与运算符检查组合权限是否包含指定的单独权限
 
     def __repr__(self):
@@ -134,6 +135,7 @@ class User(UserMixin, db.Model):
                                         foreign_keys=[Mission.assign_person_id],
                                         backref=db.backref('assign_person', lazy='joined'),
                                         lazy='dynamic', cascade='all, delete-orphan')
+
     # 返回用户布置的所有任务
 
     def __init__(self, **kwargs):
@@ -289,6 +291,20 @@ class AnonymousUser(AnonymousUserMixin):
         return False
 
 
+class WeeklyHtml(db.Model):
+    __tablename__ = 'weekly_html'
+    id = db.Column(db.Integer, db.ForeignKey('weekly.id'), primary_key=True)
+    finished_work_html = db.Column(db.Text())
+    summary_html = db.Column(db.Text())
+    demands_html = db.Column(db.Text())
+    plan_html = db.Column(db.Text())
+    remarks_html = db.Column(db.Text())
+
+    def __init__(self, weekly_id):
+        super(WeeklyHtml, self).__init__()
+        self.id = weekly_id
+
+
 # 周报模型
 class Weekly(db.Model):
     __tablename__ = 'weekly'
@@ -299,71 +315,24 @@ class Weekly(db.Model):
     demands = db.Column(db.Text())  # 协调请求和需要的帮助
     plan = db.Column(db.Text())  # 下周计划
     remarks = db.Column(db.Text())  # 备注
-    finished_work_html = db.Column(db.Text())
-    summary_html = db.Column(db.Text())
-    demands_html = db.Column(db.Text())
-    plan_html = db.Column(db.Text())
-    remarks_html = db.Column(db.Text())
     attachment = db.Column(db.String(512))  # 附件名称
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # 作者
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))  # 属于组
     visible = db.Column(db.Boolean, default=True)  # 默认全平台可见
     commentable = db.Column(db.Boolean, default=True)  # 默认可以评论
-    comments = db.relationship('Comment', backref='weekly', lazy='dynamic')  # 返回该周报所有评论
+    comments = db.relationship('Comment', backref='weekly', lazy='dynamic', cascade='all, delete-orphan')  # 返回该周报所有评论
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)  # 时间戳
-    mission = db.relationship('Mission', backref='weekly', lazy='dynamic')  # 返回该组所有任务
+    mission = db.relationship('Mission', backref='weekly', lazy='dynamic', cascade='all, delete-orphan')  # 返回该组所有任务
+    weekly_html = db.relationship('WeeklyHtml', backref='weekly', lazy='dynamic',
+                                  cascade='all, delete-orphan')  # 返回该周报所有的html形式的属性
+
+    def __init__(self, *args, **kwargs):
+        super(Weekly, self).__init__(*args, **kwargs)
 
     def ping(self):
         self.timestamp = datetime.utcnow()
         db.session.add(self)
         db.session.commit()
-
-    @staticmethod
-    def on_change_finished_work(target, value, oldvalue, initiator):
-        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
-                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
-                        'h1', 'h2', 'h3', 'p']
-        target.finished_work_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'),
-                                                                tags=allowed_tags, strip=True))
-
-    @staticmethod
-    def on_change_summary(target, value, oldvalue, initiator):
-        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
-                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
-                        'h1', 'h2', 'h3', 'p']
-        target.summary_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'),
-                                                          tags=allowed_tags, strip=True))
-
-    @staticmethod
-    def on_change_demands(target, value, oldvalue, initiator):
-        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
-                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
-                        'h1', 'h2', 'h3', 'p']
-        target.demands_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'),
-                                                          tags=allowed_tags, strip=True))
-
-    @staticmethod
-    def on_change_plan(target, value, oldvalue, initiator):
-        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
-                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
-                        'h1', 'h2', 'h3', 'p']
-        target.plan_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'),
-                                                       tags=allowed_tags, strip=True))
-
-    @staticmethod
-    def on_change_remarks(target, value, oldvalue, initiator):
-        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
-                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
-                        'h1', 'h2', 'h3', 'p']
-        target.remarks_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'),
-                                                          tags=allowed_tags, strip=True))
-
-
-db.event.listen(Weekly.finished_work, 'set', Weekly.on_change_finished_work)
-db.event.listen(Weekly.summary, 'set', Weekly.on_change_summary)
-db.event.listen(Weekly.demands, 'set', Weekly.on_change_demands)
-db.event.listen(Weekly.plan, 'set', Weekly.on_change_plan)
-db.event.listen(Weekly.remarks, 'set', Weekly.on_change_remarks)
 
 
 # 评论模型
@@ -371,21 +340,9 @@ class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text)
-    body_html = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     weekly_id = db.Column(db.Integer, db.ForeignKey('weekly.id'))
-
-    @staticmethod
-    def on_change_body(target, value, oldvalue, initiator):
-        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'code', 'em', 'i',
-                        'strong']
-        target.body_html = bleach.linkify(bleach.clean(
-            markdown(value, output_format='html'),
-            tags=allowed_tags, strip=True))
-
-
-db.event.listen(Comment.body, 'set', Comment.on_change_body)
 
 
 @login_manager.user_loader

@@ -17,8 +17,8 @@
     {% endif %}
     <div>
     <h2>本周完成工作</h2>
-    {% if weekly.finished_work_html %}
-        <p>{{ weekly.finished_work_html | safe }}</p>
+    {% if weekly.weekly_html[0].finished_work_html %}
+        <p>{{ weekly.weekly_html[0].finished_work_html | safe }}</p>
     {% else %}
         <p>{{ weekly.finished_work }}</p>
     {% endif %}
@@ -26,8 +26,8 @@
 
     <div>
     <h2>本周总结</h2>
-    {% if weekly.summary_html %}
-        <p>{{ weekly.summary_html | safe }}</p>
+    {% if weekly.weekly_html[0].summary_html %}
+        <p>{{ weekly.weekly_html[0].summary_html | safe }}</p>
     {% else %}
         <p>{{ weekly.summary }}</p>
     {% endif %}
@@ -35,8 +35,8 @@
 
     <div>
     <h2>协调及帮助请求</h2>
-    {% if weekly.demands_html %}
-        <p>{{ weekly.demands_html | safe }}</p>
+    {% if weekly.weekly_html[0].demands_html %}
+        <p>{{ weekly.weekly_html[0].demands_html | safe }}</p>
     {% else %}
         <p>{{ weekly.demands }}</p>
     {% endif %}
@@ -44,17 +44,17 @@
 
     <div>
     <h2>下周工作任务</h2>
-    {% if weekly.plan_html %}
-        <p>{{ weekly.plan_html | safe }}</p>
+    {% if weekly.weekly_html[0].plan_html %}
+        <p>{{ weekly.weekly_html[0].plan_html | safe }}</p>
     {% else %}
-        <p>{{ weekly.plan }}</p>
+        <p>{{ weekly.weekly_html.plan }}</p>
     {% endif %}
     </div>
 
     <div>
     <h2>备注</h2>
-    {% if weekly.remarks_html %}
-        <p>{{ weekly.remarks_html | safe }}</p>
+    {% if weekly.weekly_html[0].remarks_html %}
+        <p>{{ weekly.weekly_html[0].remarks_html | safe }}</p>
     {% else %}
         <p>{{ weekly.remarks }}</p>
     {% endif %}

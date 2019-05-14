@@ -6,7 +6,7 @@ from flask_migrate import Migrate
 
 # 本地FLASK
 from app import create_app, db
-from app.models import User, Role, Group, Weekly, Relation, Mission
+from app.models import User, Role, Group, Weekly, Relation, Mission, WeeklyHtml
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 migrate = Migrate(app, db)
@@ -16,7 +16,7 @@ migrate = Migrate(app, db)
 def make_shell_context():
     """ Shell 字典"""
     return dict(db=db, User=User, Role=Role, Group=Group, Weekly=Weekly,
-                Relation=Relation, Mission=Mission)
+                Relation=Relation, Mission=Mission, WeeklyHtml=WeeklyHtml)
 
 
 @app.cli.command()
